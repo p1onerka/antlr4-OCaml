@@ -1,0 +1,64 @@
+/*
+ * [The "BSD license"]
+ *  Copyright (c) 2024 Ksenia Kotelnikova
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *  3. The name of the author may not be used to endorse or promote products
+ *     derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ *  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+
+LexerFile(lexerFile, lexer, namedActions) ::= <<
+(* OCaml Lexer for {{ lexerFile.grammarFileName }} *)
+
+let _ = Printf.printf "ANTLR Version: %s\n" "{{ lexerFile.ANTLRVersion }}"
+
+<if(lexerFile.genPackage)>
+module {{ lexerFile.genPackage }} = struct
+<endif>
+    open Ulex
+    open Printf
+
+    <namedActions.header>
+
+<lexer>
+>>
+
+Lexer(lexer, atn, actionFuncs, sempredFuncs, superClass) ::= <<
+let _decision_to_dfa = [| |]
+let _shared_context_cache = PredictionContextCache.create ()
+
+let make_rule_names () =
+    [|
+        <lexer.ruleNames:{r | "<r>"}; separator=", " wrap, anchor>
+    |]
+
+let rule_names = make_rule_names ()
+
+let get_grammar_file_name () = "<lexer.grammarFileName>"
+let get_rule_names () = rule_names
+
+<dumpActions(lexer, "", actionFuncs, sempredFuncs)>
+<atn>
+>>
